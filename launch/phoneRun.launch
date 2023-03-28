@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+  <node name="phoneRun" pkg="ros_joy_js" type="phoneRun.bash" output="screen"/>
+</launch>
