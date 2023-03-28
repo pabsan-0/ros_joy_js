@@ -1,30 +1,36 @@
 /* websocket server connection*/
 
-var ros = new ROSLIB.Ros({
-    url: 'ws://192.168.1.63:9090'
-});
+fetch("hostname").then(res => res.text()).then(ip => {
+    var ros = new ROSLIB.Ros({
+        url: `ws://${ip}:9090`
+    });
+    
+    ros.on('connection', function() {
+    console.log('Connected to websocket server.');
+    });
+    
+    ros.on('error', function(error) {
+        console.log('Error connecting to websocket server: ', error);
+    });
+    
+    ros.on('close', function() {
+        console.log('Connection to websocket server closed.');
+    });
 
-ros.on('connection', function() {
-console.log('Connected to websocket server.');
-});
+    // topic to publish uav velocity
+    var cmdVel = new ROSLIB.Topic({
+        ros : ros,
+        name : '/uav_1/ual/set_velocity',
+        messageType : 'geometry_msgs/TwistStamped'
+    });
+})
 
-ros.on('error', function(error) {
-    console.log('Error connecting to websocket server: ', error);
-});
 
-ros.on('close', function() {
-    console.log('Connection to websocket server closed.');
-});
 
 
 /* turtle control actions */
 
-// topic to publish uav velocity
-var cmdVel = new ROSLIB.Topic({
-    ros : ros,
-    name : '/uav_1/ual/set_velocity',
-    messageType : 'geometry_msgs/TwistStamped'
-});
+
 
 // function to move the uav, linear velocity msgs publication
 function move(lin_vel_x,lin_vel_y){

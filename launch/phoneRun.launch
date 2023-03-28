@@ -1,4 +1,8 @@
 <launch>
+  <arg name="arg_ip" default="192.168.1.63"/>
+  <param name="param_ip" value="$(arg arg_ip)"/>
+
+  <arg name="vel_topic" default="/uav_1/ual/set_velocity"/>
   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
   <node name="phoneRun" pkg="ros_joy_js" type="phoneRun.bash" output="screen"/>
 </launch>
