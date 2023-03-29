@@ -30,7 +30,8 @@ git clone https://bitbucket.org/fadacatec-ondemand/ros_joy_js.git
 
 ## Usage
 We will run the controller using **roslaunch**:
-- **PC**
+
+### PC
 
 **1.** Go to your project folder 
 
@@ -49,7 +50,7 @@ roslaunch ros_joy_js run.launch
 **Now you can use the controller from your PC!!!**
 
 
-- **Phone**
+### Phone
 
 You can also control the UAV with your phone:
 
