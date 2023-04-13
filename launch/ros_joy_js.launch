@@ -1,0 +1,15 @@
+<launch>
+  <arg name="host"      default="192.168.1.63"/>
+  <arg name="port"      default="5000"/>
+  <arg name="vel_topic" default="/uav_1/ual/set_velocity"/>
+  
+  
+  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+  
+  <node pkg="ros_joy_js" type="index.js" name="http_serve" output="screen" args="
+        5000
+        /uav_1/ual/set_velocity   
+        $(find ros_joy_js)/app"
+  ></node> 
+
+</launch>
