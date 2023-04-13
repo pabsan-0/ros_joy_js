@@ -1,0 +1,11 @@
+version: '3.9'
+
+services:
+    management_tool_js:
+        image: ros_joy_js
+        build: .
+        container_name: ros_joy_js
+        tty: true
+        stdin_open: true
+        privileged: true
+        network_mode: host
