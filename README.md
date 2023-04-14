@@ -9,10 +9,11 @@ A virtual controller for ROS using NippleJS and Rosbridge.
 
 ### Docker
 
-- Build the image `docker compose up ros_joy_js`
-- Run the local web server `docker compose up ros_joy_js`
+- Build the image `docker compose build ros_joy_js`
+- Run the local web server `docker compose run ros_joy_js`
 - Get your IP `hostname -I` and navigate to `http://192.168.21.33:5000` (replace your ip)
 
+Freewheeling inside the container to run custom commands: `docker compose run ros_joy_js bash`
 
 ### Native
 
