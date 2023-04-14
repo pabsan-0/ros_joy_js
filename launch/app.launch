@@ -1,3 +1,0 @@
-<launch>
-  <node name="app" pkg="ros_joy_js" type="app.bash" output="screen"/>
-</launch>

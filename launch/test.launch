@@ -1,0 +1,14 @@
+<launch>
+  <arg name="host"  default="192.168.1.63"/>
+  <arg name="port"  default="5000"/>
+  <arg name="topic" default="/uav_1/ual/set_velocity"/>
+  
+  
+  <include file="$(find ros_joy_js)/launch/ros_joy_js.launch"/>
+  
+  <node pkg="ros_joy_js" type="test.sh" name="ros_joy_tester" output="screen" args="
+        $(arg port)
+        $(arg topic)"
+  ></node> 
+
+</launch>

@@ -1,154 +1,107 @@
-fetch("hostname").then(res => res.text()).then(ip => {
-    /* websocket server connection*/
 
-    // takes host ip from hostname file and starts connection
-    var ros = new ROSLIB.Ros({
-        url: `ws://${ip}:9090`
-    });
-    
-    ros.on('connection', function() {
-    console.log('Connected to websocket server.');
-    });
-    
-    ros.on('error', function(error) {
-        console.log('Error connecting to websocket server: ', error);
-    });
-    
-    ros.on('close', function() {
-        console.log('Connection to websocket server closed.');
-    });
+function rosFactory (on_connected_cb) {
 
-    // takes arg from phoneRun.launch
-    var topic = new ROSLIB.Param({
-        ros:ros,
-        name:'/phoneRun/vel_topic'
-    });
+    fetch("host").then(res => res.text()).then(hostname => {
+        var ros = new ROSLIB.Ros({url: `ws://${hostname}:9090`})
 
-    var cmdVel
-    topic.get(val => {
-        // topic to publish uav velocity
-        cmdVel = new ROSLIB.Topic({
+        ros.on('close', ()    => { console.log('ROS ws closed.')      })
+        ros.on('error', (err) => { console.log('ROS ws error: ', err) })
+        ros.on('connection', () => {
+            console.log('Connected to websocket server.')
+            on_connected_cb(ros)
+        })
+    })
+
+}
+
+
+function topicFactory (ros, on_ready_cb) {
+
+    fetch("topic").then(res => res.text()).then( topicname => {
+        topic = new ROSLIB.Topic({
             ros : ros,
-            name : val,
+            name : topicname,
             messageType : 'geometry_msgs/TwistStamped'
-        });
-    });
-
-
-    /* uav control actions */
-
-    // function to move the uav, linear velocity msgs publication
-    function move(lin_vel_x,lin_vel_y){
-        var msg = new ROSLIB.Message({
-            twist : {
-                linear : {
-                x : lin_vel_x,
-                y : lin_vel_y,
-                z : 0.0
-                }
-            }
-        });
-
-        cmdVel.publish(msg);
-    };
-
-
-    // function to rotate the uav, angular velocity msgs publication
-    function rotate(ang_vel_z){
-        var msg = new ROSLIB.Message({
-            twist : {
-                angular : {
-                    x : 0.0,
-                    y : 0.0,
-                    z : ang_vel_z
-                }            
-            }
-        });
-
-        cmdVel.publish(msg);
-    }
-
-
-    // joystick to control uav movement
-    function movementJoystick (){
-
-        //joystick creation
-        const manager1 = nipplejs.create({
-            zone: document.getElementById("zone_joystick_mov"),
-            color: "blue",
-            mode: 'static',
-            position: {left: '50%', top: '50%'},
-        });
-        
-        let interval;
-        
-        lin_vel_x = 0;
-        lin_vel_y = 0;
-        
-        // starts joystick movement
-        manager1.on("start", function(evt, data) {
-            interval = setInterval(function() {
-                move(lin_vel_x,lin_vel_y)
-            }, 25)
-        });
-        
-        // joystick movement using linear velocity (x,y), takes its position
-        manager1.on("move", function(evt, data) {
-            max_linear = 7.5;
-            max_distance = 75.0;
-            lin_vel_x = Math.cos(data.angle.radian) * max_linear * data.distance/max_distance;
-            lin_vel_y = Math.sin(data.angle.radian) * max_linear * data.distance/max_distance;
-            pos = data.position;
-        });
-        
-        // stops joystick movement 
-        manager1.on("end", function() {
-            if (interval){
-                clearInterval(interval);
-            }
-            move(0,0);
         })
-    }
+        on_ready_cb(topic)
+    })
+
+}
 
 
-    // joystick to control uav orientation
-    function orientationJoystick (){
+function joystickFactory (html_pos, joy_out_cb, halt=true, rate_ms=25, color="blue") {
+    /**
+     *  Instance a joystick and attach a callback that is fired every 25 ms
+     * 
+     *      joy_out_cb( (x,y) => {} )
+     */
 
-        //joystick creation
-        const manager2 = nipplejs.create({
-            zone: document.getElementById("zone_joystick_or"),
-            color: "red",
-            mode: 'static',
-            position: {left: '50%', top: '50%'},
-        });
-        
-        let interval;
-        
-        ang_vel_z = 0;
-        
-        // starts joystick movement (uav rotation)
-        manager2.on("start", function(evt, data) {
-            interval = setInterval(function() {
-                rotate(ang_vel_z)
-            }, 25)
-        });
-        
-        // joystick movement using angular velocity (z),
-        manager2.on("move", function(evt, data) {
-            max_angular = 2.0;
-            max_distance = 75.0;
-            ang_vel_z = -Math.cos(data.angle.radian) * max_angular * data.distance/max_distance;
-        });
-        
-        // stops joystick movement (uav rotation)
-        manager2.on("end", function() {
-            if (interval){
-                clearInterval(interval);
+    let hor_val = 0
+    let ver_val = 0
+    let interval = null
+    let max_distance = 75.0;
+
+    let joy = nipplejs.create({
+        zone: document.getElementById(html_pos), // "zone_joystick_mov"),
+        color: color,
+        mode: 'static',
+        position: {left: '50%', top: '50%'},
+    })
+
+    joy.on("start", (evt, data) => {
+        interval = setInterval(() => {
+            joy_out_cb(hor_val, ver_val) 
+        }, rate_ms)
+    })
+    
+    joy.on("end", () => {
+        clearInterval(interval)
+        if (halt === true) {
+            joy_out_cb(0, 0)
+        }
+    })
+
+    joy.on("move", (evt, data) => {
+        hor_val = Math.cos(data.angle.radian) * data.distance / max_distance
+        ver_val = Math.sin(data.angle.radian) * data.distance / max_distance
+    })
+
+}
+
+
+
+
+LINEAR_GAIN  = 7.5
+ANGULAR_GAIN = 2.0
+
+rosFactory((ros) => {
+    topicFactory(ros, (topic) => {  
+
+        right = joystickFactory ("zone_joystick_or", (x,y) => {
+                topic.publish(new ROSLIB.Message({
+                    twist: {
+                        linear: {
+                            x: x * LINEAR_GAIN,
+                            y: y * LINEAR_GAIN,
+                            z: 0.0
+                        }
+                    }})
+                )
             }
-            rotate(0);
-        })
-    }
+        ) 
+        
+        left = joystickFactory ("zone_joystick_mov", (x,y) => {
+                topic.publish(new ROSLIB.Message({
+                    twist: { 
+                        angular: {
+                            x: 0.0,
+                            y: 0.0,
+                            z: x * ANGULAR_GAIN 
+                        }            
+                    }})
+                )
+            }
+        )
 
-    movementJoystick()
-    orientationJoystick()
+    })
 })
