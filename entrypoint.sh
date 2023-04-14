@@ -1,2 +1,5 @@
 #!/bin/bash
-roslaunch ros_joy_js ros_joy_js port:=5000 namespace:=/ual/uav_1
+
+cd /catkin_ws && \
+. devel/setup.bash && \
+roslaunch ros_joy_js ros_joy_js.launch

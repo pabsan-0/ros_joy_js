@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { readFile } = require('fs').promises;
+const fs = require('fs');
 const express = require('express');
 const ip = require("ip"); 
 
@@ -32,7 +32,7 @@ app.get("/topic", (req, res) => {
 app.use(express.static(apppath));
 
 app.get('/', async (request, response) => {
-    response.send( await readFile("index.html", 'utf8'));
+    response.send( await fs.readFile("index.html", 'utf8'));
 });
 
 app.listen(process.env.PORT || port, () => {
