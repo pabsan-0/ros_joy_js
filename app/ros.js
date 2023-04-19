@@ -42,7 +42,7 @@ function joystickFactory (html_pos, joy_out_cb, halt=true, rate_ms=25, color="bl
     let max_distance = 75.0;
 
     let joy = nipplejs.create({
-        zone: document.getElementById(html_pos), // "zone_joystick_mov"),
+        zone: document.getElementById(html_pos), // "zone_joystick_l"),
         color: color,
         mode: 'static',
         position: {left: '50%', top: '50%'},
@@ -71,18 +71,18 @@ function joystickFactory (html_pos, joy_out_cb, halt=true, rate_ms=25, color="bl
 
 
 
-LINEAR_GAIN  = 7.5
-ANGULAR_GAIN = 2.0
+LINEAR_GAIN  = 1.0
+ANGULAR_GAIN = 5.0
 
 rosFactory((ros) => {
     topicFactory(ros, (topic) => {  
 
-        right = joystickFactory ("zone_joystick_or", (x,y) => {
+        right = joystickFactory ("zone_joystick_r", (hor,ver) => {
                 topic.publish(new ROSLIB.Message({
                     twist: {
                         linear: {
-                            x: x * LINEAR_GAIN,
-                            y: y * LINEAR_GAIN,
+                            x: hor * LINEAR_GAIN,
+                            y: ver * LINEAR_GAIN,
                             z: 0.0
                         }
                     }})
@@ -90,13 +90,18 @@ rosFactory((ros) => {
             }
         ) 
         
-        left = joystickFactory ("zone_joystick_mov", (x,y) => {
+        left = joystickFactory ("zone_joystick_l", (hor,ver) => {
                 topic.publish(new ROSLIB.Message({
                     twist: { 
+                        linear: {
+                            x: 0.0,
+                            y: 0.0,
+                            z: ver * LINEAR_GAIN
+                        },
                         angular: {
                             x: 0.0,
                             y: 0.0,
-                            z: x * ANGULAR_GAIN 
+                            z: hor * ANGULAR_GAIN 
                         }            
                     }})
                 )
