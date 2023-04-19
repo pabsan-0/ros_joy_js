@@ -1,5 +1,4 @@
 <launch>
-  <arg name="host"  default="192.168.1.63"/>
   <arg name="port"  default="5000"/>
   <arg name="topic" default="/uav_1/ual/set_velocity"/>
   

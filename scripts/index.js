@@ -36,7 +36,7 @@ app.get('/', async (request, response) => {
 });
 
 app.listen(process.env.PORT || port, () => {
-    console.log(`NODE: App available on http://localhost:${port}`)
+    console.log(`NODE: App available on http://${ip.address()}:${port}`)
 });
 
 
