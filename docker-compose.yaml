@@ -9,3 +9,5 @@ services:
         stdin_open: true
         privileged: true
         network_mode: host
+        environment:
+            - ROS_MASTER_URI=$ROS_MASTER_URI
