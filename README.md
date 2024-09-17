@@ -32,13 +32,6 @@ Freewheeling inside the container to run custom commands: `docker compose run ro
     - `topic`: topic where Twist messages will be published to
 - `test.launch`: Launches `ros_joy_js.launch` PLUS a `rostopic echo` to get joystick feedback without a frontend
 
-
-## Contact
-
-Pablo Santana -> psantana@catec.aero  
-Bea Llamas -> []  
-
-  
 ## Further reading
 
 #### Nodejs briefing for non-JS programmers
